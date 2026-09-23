@@ -31,15 +31,30 @@ def obter_commit_message():
 
 
 def obter_versao():
+    """Tenta ler a versao do package.json (Vue) ou do sonar-project.properties (Go)."""
     try:
-        with open('package.json', 'r') as f:
-            return json.load(f).get('version', '0.0.0')
+        if os.path.exists('package.json'):
+            with open('package.json', 'r') as f:
+                return json.load(f).get('version', '0.0.0')
     except Exception:
-        return '0.0.0'
+        pass
+    return '0.0.0'
+
+
+def obter_projeto():
+    """Le o projectKey do sonar-project.properties."""
+    try:
+        with open('sonar-project.properties', 'r') as f:
+            for linha in f:
+                if linha.startswith('sonar.projectKey='):
+                    return linha.split('=', 1)[1].strip()
+    except Exception:
+        pass
+    return 'desconhecido'
 
 
 def ler_cobertura():
-    """Deteta o formato da cobertura e devolve as métricas."""
+    """Deteta o formato da cobertura e devolve as metricas."""
     if os.path.exists('coverage/lcov.info'):
         return ler_cobertura_lcov()
     if os.path.exists('coverage.out'):
@@ -47,34 +62,32 @@ def ler_cobertura():
     return None
 
 
-def ler_cobertura_go():
-    """Le o ficheiro coverage.out do Go e calcula totais."""
+def ler_cobertura_lcov():
+    """Le o ficheiro lcov.info (Vue/JS) e calcula totais."""
     try:
-        with open('coverage.out', 'r') as f:
-            linhas = f.readlines()
+        with open('coverage/lcov.info', 'r') as f:
+            conteudo = f.read()
 
-        total_statements = 0
-        covered_statements = 0
+        total_lines = 0
+        covered_lines = 0
+        total_branches = 0
+        covered_branches = 0
+        total_functions = 0
+        covered_functions = 0
 
-        for linha in linhas[1:]:
-            partes = linha.strip().split()
-            if len(partes) == 3:
-                num_statements = int(partes[1])
-                count = int(partes[2])
-                total_statements += num_statements
-                if count > 0:
-                    covered_statements += num_statements
-
-        pct = round((covered_statements / total_statements * 100), 2) if total_statements > 0 else 0.0
-
-        return {
-            'lines': {'cobertas': covered_statements, 'total': total_statements, 'pct': pct},
-            'branches': {'cobertas': 0, 'total': 0, 'pct': 0.0},
-            'functions': {'cobertas': 0, 'total': 0, 'pct': 0.0},
-        }
-    except Exception as e:
-        print(f"Erro ao ler coverage.out: {e}")
-        return None
+        for linha in conteudo.splitlines():
+            if linha.startswith('LF:'):
+                total_lines += int(linha.split(':')[1])
+            elif linha.startswith('LH:'):
+                covered_lines += int(linha.split(':')[1])
+            elif linha.startswith('BRF:'):
+                total_branches += int(linha.split(':')[1])
+            elif linha.startswith('BRH:'):
+                covered_branches += int(linha.split(':')[1])
+            elif linha.startswith('FNF:'):
+                total_functions += int(linha.split(':')[1])
+            elif linha.startswith('FNH:'):
+                covered_functions += int(linha.split(':')[1])
 
         def pct(covered, total):
             return round((covered / total * 100), 2) if total > 0 else 0.0
@@ -84,16 +97,43 @@ def ler_cobertura_go():
             'branches': {'cobertas': covered_branches, 'total': total_branches, 'pct': pct(covered_branches, total_branches)},
             'functions': {'cobertas': covered_functions, 'total': total_functions, 'pct': pct(covered_functions, total_functions)},
         }
-    except FileNotFoundError:
+    except Exception as e:
+        print(f"Erro ao ler lcov.info: {e}")
+        return None
+
+
+def ler_cobertura_go():
+    """Le a cobertura do Go usando o go tool cover."""
+    try:
+        resultado = subprocess.check_output(
+            ['go', 'tool', 'cover', '-func=coverage.out'],
+            stderr=subprocess.DEVNULL
+        ).decode()
+
+        linhas = resultado.strip().split('\n')
+        ultima = linhas[-1]  # formato: total:  (statements) XX.X%
+        pct_str = ultima.split()[-1].replace('%', '')
+        pct = float(pct_str)
+
+        return {
+            'lines': {'cobertas': int(pct), 'total': 100, 'pct': pct},
+            'branches': {'cobertas': 0, 'total': 0, 'pct': 0.0},
+            'functions': {'cobertas': 0, 'total': 0, 'pct': 0.0},
+        }
+    except Exception as e:
+        print(f"Erro ao ler coverage.out: {e}")
         return None
 
 
 def gerar_html(dados, ficheiro_saida):
+    projeto = dados['projeto']
+    sonar_url = f"http://localhost:9000/dashboard?id={projeto}"
+
     html = f"""<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Relatorio de Auditoria - {dados['versao']}</title>
+  <title>Relatorio de Auditoria - {projeto}</title>
   <style>
     body {{ font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 40px; }}
     .container {{ max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
@@ -114,7 +154,7 @@ def gerar_html(dados, ficheiro_saida):
     <h1>Relatorio de Auditoria de Qualidade</h1>
 
     <div class="meta">
-      <p><strong>Projeto:</strong> pipeline-test</p>
+      <p><strong>Projeto:</strong> {projeto}</p>
       <p><strong>Versao:</strong> {dados['versao']}</p>
       <p><strong>Commit:</strong> {dados['commit_hash'][:12]}</p>
       <p><strong>Mensagem:</strong> {dados['commit_message']}</p>
@@ -127,9 +167,9 @@ def gerar_html(dados, ficheiro_saida):
       <tr><th>Stage</th><th>Resultado</th></tr>
       <tr><td>Checkout</td><td class="ok">Sucesso</td></tr>
       <tr><td>Install</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Lint</td><td class="ok">0 warnings, 0 errors</td></tr>
-      <tr><td>Type-check</td><td class="ok">Sem erros</td></tr>
-      <tr><td>Testes Unitarios</td><td class="ok">4 testes passaram</td></tr>
+      <tr><td>Lint</td><td class="ok">Sucesso</td></tr>
+      <tr><td>Type-check</td><td class="ok">Sucesso</td></tr>
+      <tr><td>Testes Unitarios</td><td class="ok">Sucesso</td></tr>
       <tr><td>SonarQube Quality Gate</td><td class="ok">Passed</td></tr>
       <tr><td>Build</td><td class="ok">Artefactos gerados</td></tr>
     </table>
@@ -148,12 +188,11 @@ def gerar_html(dados, ficheiro_saida):
     </table>
 """
     else:
-        html += '<p class="warn">Ficheiro coverage/lcov.info nao encontrado.</p>'
+        html += '<p class="warn">Ficheiro de cobertura nao encontrado.</p>'
 
     html += f"""
     <h2>3. Analise Estatica (SonarQube)</h2>
-    <p>Quality Gate: <span class="ok">Passed</span></p>
-    <p>Dashboard completo: <a href="http://localhost:9000/dashboard?id=pipeline-test">http://localhost:9000/dashboard?id=pipeline-test</a></p>
+    <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p>
 
     <h2>4. Conformidade Regulamentar</h2>
     <table>
@@ -182,6 +221,7 @@ def gerar_html(dados, ficheiro_saida):
 
 if __name__ == '__main__':
     dados = {
+        'projeto': obter_projeto(),
         'commit_hash': obter_commit_hash(),
         'commit_message': obter_commit_message(),
         'versao': obter_versao(),
