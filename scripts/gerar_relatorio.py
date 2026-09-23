@@ -38,31 +38,43 @@ def obter_versao():
         return '0.0.0'
 
 
-def ler_cobertura_lcov():
+def ler_cobertura():
+    """Deteta o formato da cobertura e devolve as métricas."""
+    if os.path.exists('coverage/lcov.info'):
+        return ler_cobertura_lcov()
+    if os.path.exists('coverage.out'):
+        return ler_cobertura_go()
+    return None
+
+
+def ler_cobertura_go():
+    """Le o ficheiro coverage.out do Go e calcula totais."""
     try:
-        with open('coverage/lcov.info', 'r') as f:
-            conteudo = f.read()
+        with open('coverage.out', 'r') as f:
+            linhas = f.readlines()
 
-        total_lines = 0
-        covered_lines = 0
-        total_branches = 0
-        covered_branches = 0
-        total_functions = 0
-        covered_functions = 0
+        total_statements = 0
+        covered_statements = 0
 
-        for linha in conteudo.splitlines():
-            if linha.startswith('LF:'):
-                total_lines += int(linha.split(':')[1])
-            elif linha.startswith('LH:'):
-                covered_lines += int(linha.split(':')[1])
-            elif linha.startswith('BRF:'):
-                total_branches += int(linha.split(':')[1])
-            elif linha.startswith('BRH:'):
-                covered_branches += int(linha.split(':')[1])
-            elif linha.startswith('FNF:'):
-                total_functions += int(linha.split(':')[1])
-            elif linha.startswith('FNH:'):
-                covered_functions += int(linha.split(':')[1])
+        for linha in linhas[1:]:
+            partes = linha.strip().split()
+            if len(partes) == 3:
+                num_statements = int(partes[1])
+                count = int(partes[2])
+                total_statements += num_statements
+                if count > 0:
+                    covered_statements += num_statements
+
+        pct = round((covered_statements / total_statements * 100), 2) if total_statements > 0 else 0.0
+
+        return {
+            'lines': {'cobertas': covered_statements, 'total': total_statements, 'pct': pct},
+            'branches': {'cobertas': 0, 'total': 0, 'pct': 0.0},
+            'functions': {'cobertas': 0, 'total': 0, 'pct': 0.0},
+        }
+    except Exception as e:
+        print(f"Erro ao ler coverage.out: {e}")
+        return None
 
         def pct(covered, total):
             return round((covered / total * 100), 2) if total > 0 else 0.0
@@ -174,7 +186,7 @@ if __name__ == '__main__':
         'commit_message': obter_commit_message(),
         'versao': obter_versao(),
         'data_geracao': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'cobertura': ler_cobertura_lcov(),
+        'cobertura': ler_cobertura(),
     }
 
     gerar_html(dados, 'reports/auditoria.html')
