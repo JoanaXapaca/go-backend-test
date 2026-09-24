@@ -10,7 +10,9 @@ type-check:
 	go vet ./...
 
 test:
-	go test -coverprofile=coverage.out -covermode=atomic ./...
+	go test -coverprofile=coverage.out ./...
+	powershell -Command "(Get-Content coverage.out) -replace 'github.com/JoanaXapaca/go-backend-test/', '' | Set-Content coverage.out"
+
 
 build:
 	go build -o bin/app.exe .
