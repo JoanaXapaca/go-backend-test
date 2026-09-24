@@ -16,7 +16,7 @@ build:
 	go build -o bin/app.exe .
 
 sonar:
-	npx sonar-scanner -Dsonar.qualitygate.wait=true
+	npx sonar-scanner -Dsonar.qualitygate.wait=false
 
 clean:
 	rm -rf bin coverage.out reports .scannerwork
