@@ -10,8 +10,8 @@ type-check:
 	go vet ./...
 
 test:
-	go test -coverprofile=coverage.out ./...
-	powershell -Command "(Get-Content coverage.out) -replace 'github.com/JoanaXapaca/go-backend-test/', '' | Set-Content coverage.out"
+	go test -coverprofile=coverage.out -covermode count ./...
+	go-bcov -format sonar-cover-report < coverage.out > coverage.xml
 
 
 build:
