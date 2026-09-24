@@ -11,7 +11,7 @@ type-check:
 
 test:
 	go test -coverprofile=coverage.out -covermode count ./...
-	go-bcov -format sonar-cover-report < coverage.out > coverage.xml
+	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 
 build:
