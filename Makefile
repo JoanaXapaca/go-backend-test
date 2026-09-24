@@ -10,13 +10,13 @@ type-check:
 	go vet ./...
 
 test:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out -covermode=atomic ./...
 
 build:
 	go build -o bin/app.exe .
 
 sonar:
-	npx sonar-scanner -Dsonar.qualitygate.wait=false
+	npx sonar-scanner -Dsonar.qualitygate.wait=true
 
 clean:
 	rm -rf bin coverage.out reports .scannerwork
