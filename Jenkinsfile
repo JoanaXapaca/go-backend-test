@@ -36,6 +36,12 @@ pipeline {
             }
         }
 
+        stage('Testes E2E') {
+            steps {
+                bat 'make test-e2e'
+            }
+        }
+
         stage('SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {

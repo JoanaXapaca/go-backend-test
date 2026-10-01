@@ -13,6 +13,8 @@ test:
 	go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
+test-e2e:
+	go test -tags=e2e -v ./...
 
 build:
 	go build -o bin/app.exe .
