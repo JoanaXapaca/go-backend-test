@@ -5,6 +5,18 @@ Le os resultados da pipeline e gera um HTML auditavel.
 """
 
 import os
+
+import hashlib
+
+def calcular_hash(ficheiro):
+    if not os.path.exists(ficheiro):
+        return "N/A"
+    try:
+        with open(ficheiro, 'rb') as f:
+            return hashlib.sha256(f.read()).hexdigest()[:16]
+    except Exception:
+        return "N/A"
+
 import json
 import subprocess
 from datetime import datetime
@@ -189,7 +201,14 @@ def gerar_html(dados, ficheiro_saida):
 """
     else:
         html += '<p class="warn">Ficheiro de cobertura nao encontrado.</p>'
-
+    html += f"""
+    <h2>3. Design Outputs</h2>
+    <table>
+      <tr><th>Output</th><th>Localizacao</th><th>SHA256</th></tr>
+      <tr><td>Binario Go</td><td>bin/app.exe</td><td>{calcular_hash('bin/app.exe')}</td></tr>
+      <tr><td>Ficheiro de cobertura</td><td>coverage.xml</td><td>{calcular_hash('coverage.xml')}</td></tr>
+    </table>
+"""
     html += f"""
     <h2>3. Analise Estatica (SonarQube)</h2>
     <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p>
