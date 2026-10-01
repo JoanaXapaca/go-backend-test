@@ -44,7 +44,26 @@ pipeline {
             }
         }
 
-        stage('Build') {
+
+        stage('Design Review') {
+            when {
+                expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == null }
+            }
+            steps {
+                script {
+                    def aprovador = input(
+                        message: 'Design Review: Aprovar release?',
+                        ok: 'Aprovar',
+                        parameters: [
+                            string(name: 'APROVADOR_NOME', defaultValue: 'Joana Rego', description: 'Nome do aprovador')
+                        ]
+                    )
+                    env.APROVADOR = aprovador
+                }
+            }
+        }        
+
+	stage('Build') {
             steps {
                 bat 'make build'
             }
