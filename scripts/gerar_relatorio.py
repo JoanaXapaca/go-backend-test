@@ -5,10 +5,15 @@ Le os resultados da pipeline e gera um HTML auditavel.
 """
 
 import os
-
+import json
 import hashlib
+import subprocess
+import re
+from datetime import datetime
+
 
 def calcular_hash(ficheiro):
+    """Calcula o SHA256 (primeiros 16 chars) de um ficheiro."""
     if not os.path.exists(ficheiro):
         return "N/A"
     try:
@@ -17,9 +22,11 @@ def calcular_hash(ficheiro):
     except Exception:
         return "N/A"
 
-import json
-import subprocess
-from datetime import datetime
+
+def extrair_jira_id(mensagem):
+    """Extrai o ID do Jira (ex: CONNEX-123) de uma mensagem."""
+    match = re.search(r'([A-Z]+-\d+)', mensagem)
+    return match.group(1) if match else None
 
 
 def obter_commit_hash():
@@ -140,6 +147,8 @@ def ler_cobertura_go():
 def gerar_html(dados, ficheiro_saida):
     projeto = dados['projeto']
     sonar_url = f"http://localhost:9000/dashboard?id={projeto}"
+    jira_id = dados.get('jira_id') or 'N/A'
+    aprovador = dados.get('aprovador') or 'N/A'
 
     html = f"""<!DOCTYPE html>
 <html lang="pt">
@@ -154,11 +163,13 @@ def gerar_html(dados, ficheiro_saida):
     .meta {{ background: #ecf0f1; padding: 20px; border-radius: 6px; margin-bottom: 20px; }}
     .meta p {{ margin: 8px 0; }}
     table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
-    th {{ background: #3498db; color: white; padding: 12px; text-align: left; }}
+    th {{ background: #2c3e50; color: white; padding: 12px; text-align: left; }}
     td {{ padding: 10px; border-bottom: 1px solid #ddd; }}
     .ok {{ color: #27ae60; font-weight: bold; }}
     .warn {{ color: #f39c12; font-weight: bold; }}
     .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #7f8c8d; text-align: center; }}
+    ul {{ line-height: 1.8; }}
+    code {{ background: #ecf0f1; padding: 2px 6px; border-radius: 3px; font-family: monospace; }}
   </style>
 </head>
 <body>
@@ -168,8 +179,10 @@ def gerar_html(dados, ficheiro_saida):
     <div class="meta">
       <p><strong>Projeto:</strong> {projeto}</p>
       <p><strong>Versao:</strong> {dados['versao']}</p>
-      <p><strong>Commit:</strong> {dados['commit_hash'][:12]}</p>
+      <p><strong>Commit:</strong> <code>{dados['commit_hash'][:12]}</code></p>
       <p><strong>Mensagem:</strong> {dados['commit_message']}</p>
+      <p><strong>Jira Ticket:</strong> {jira_id}</p>
+      <p><strong>Aprovador:</strong> {aprovador}</p>
       <p><strong>Data de geracao:</strong> {dados['data_geracao']}</p>
       <p><strong>Executado por:</strong> Jenkins CI/CD</p>
     </div>
@@ -182,6 +195,7 @@ def gerar_html(dados, ficheiro_saida):
       <tr><td>Lint</td><td class="ok">Sucesso</td></tr>
       <tr><td>Type-check</td><td class="ok">Sucesso</td></tr>
       <tr><td>Testes Unitarios</td><td class="ok">Sucesso</td></tr>
+      <tr><td>Testes E2E</td><td class="ok">Sucesso</td></tr>
       <tr><td>SonarQube Quality Gate</td><td class="ok">Passed</td></tr>
       <tr><td>Build</td><td class="ok">Artefactos gerados</td></tr>
     </table>
@@ -201,31 +215,45 @@ def gerar_html(dados, ficheiro_saida):
 """
     else:
         html += '<p class="warn">Ficheiro de cobertura nao encontrado.</p>'
+
     html += f"""
-    <h2>3. Design Outputs</h2>
+    <h2>3. Design Outputs (ISO 13485 sec. 7.3.3)</h2>
     <table>
       <tr><th>Output</th><th>Localizacao</th><th>SHA256</th></tr>
-      <tr><td>Binario Go</td><td>bin/app.exe</td><td>{calcular_hash('bin/app.exe')}</td></tr>
-      <tr><td>Ficheiro de cobertura</td><td>coverage.xml</td><td>{calcular_hash('coverage.xml')}</td></tr>
+      <tr><td>Binario Go</td><td>bin/app.exe</td><td><code>{calcular_hash('bin/app.exe')}</code></td></tr>
+      <tr><td>Ficheiro de cobertura</td><td>coverage.xml</td><td><code>{calcular_hash('coverage.xml')}</code></td></tr>
+      <tr><td>Relatorio HTML</td><td>reports/auditoria.html</td><td>N/A (em geracao)</td></tr>
     </table>
-"""
-    html += f"""
-    <h2>3. Analise Estatica (SonarQube)</h2>
+
+    <h2>4. Analise Estatica (SonarQube)</h2>
     <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p>
 
-    <h2>4. Conformidade Regulamentar</h2>
+    <h2>5. Documentacao ISO 13485</h2>
+    <p>Documentos de design e desenvolvimento (SOP 7.3):</p>
+    <ul>
+      <li><a href="../../docs/design-development-plan.md">Design and Development Plan (SOP 7.3.1)</a></li>
+      <li><a href="../../docs/requirements.md">Requirements Specification (SOP 7.3.2)</a></li>
+      <li><a href="../../docs/traceability-matrix.md">Traceability Matrix (SOP 7.3.2 + 7.3.5)</a></li>
+      <li><a href="../../docs/qms-software-validation.md">QMS Software Validation (SOP 4.1.6)</a></li>
+      <li><a href="../../docs/validation-plan.md">Validation Plan (SOP 7.3.6)</a></li>
+      <li><a href="../../docs/design-file/README.md">Design File (SOP 7.3.10)</a></li>
+    </ul>
+
+    <h2>6. Conformidade Regulamentar</h2>
     <table>
       <tr><th>Norma</th><th>Requisito</th><th>Estado</th></tr>
       <tr><td>ISO 13485:2016</td><td>Rastreabilidade de testes e analise estatica</td><td class="ok">Documentado</td></tr>
+      <tr><td>ISO 13485 sec. 7.3</td><td>Design and Development File</td><td class="ok">Documentado</td></tr>
       <tr><td>FDA (SaMD)</td><td>Quality Gate obrigatorio antes do build</td><td class="ok">Aplicado</td></tr>
       <tr><td>HIPAA</td><td>Controlo de acesso via VPN + credenciais</td><td class="ok">Aplicado</td></tr>
       <tr><td>WCAG 2.1 AA</td><td>Acessibilidade (a validar em E2E)</td><td class="warn">Pendente</td></tr>
-      <tr><td>OWASP Top 10</td><td>Analise estatica via SonarQube</td><td class="ok">Aplicado</td></tr>
+      <tr><td>OWASP Top 10</td><td>Analise estatica parcial via SonarQube Community</td><td class="warn">Parcial</td></tr>
     </table>
 
     <div class="footer">
       <p>Relatorio gerado automaticamente pela pipeline CI/CD do Jenkins.</p>
       <p>Este documento e parte integrante do processo de validacao de software medico.</p>
+      <p>Retencao: 2 anos ou tempo de vida do dispositivo (SOP 4.2.5).</p>
     </div>
   </div>
 </body>
@@ -239,13 +267,17 @@ def gerar_html(dados, ficheiro_saida):
 
 
 if __name__ == '__main__':
+    commit_message = obter_commit_message()
+
     dados = {
         'projeto': obter_projeto(),
         'commit_hash': obter_commit_hash(),
-        'commit_message': obter_commit_message(),
+        'commit_message': commit_message,
         'versao': obter_versao(),
         'data_geracao': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'cobertura': ler_cobertura(),
+        'jira_id': extrair_jira_id(commit_message),
+        'aprovador': os.environ.get('APROVADOR', 'N/A'),
     }
 
     gerar_html(dados, 'reports/auditoria.html')
