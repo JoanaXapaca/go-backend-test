@@ -226,8 +226,9 @@ def gerar_html(dados, ficheiro_saida):
     </table>
 
     <h2>4. Analise Estatica (SonarQube)</h2>
-    <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p>
-
+    <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p> 
+    <h2>5. Documentacao Confluence</h2>
+    <p><a href="URL_DA_PAGINA_CONFLUENCE">Pipeline CI/CD — Documentação ISO 13485</a></p>
     <h2>5. Documentacao ISO 13485</h2>
     <p>Documentos de design e desenvolvimento (SOP 7.3):</p>
     <ul>
