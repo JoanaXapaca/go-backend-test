@@ -42,14 +42,13 @@ pipeline {
             }
         }
 
-        stage('SonarQube') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    bat 'make sonar'
-                }
-            }
+	stage('SonarQube') {
+   		 steps {
+     	   withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
+            	bat 'npx sonar-scanner -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://localhost:9000 -Dsonar.qualitygate.wait=true'
         }
-
+    }
+}
 
         stage('Design Review') {
             when {
