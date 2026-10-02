@@ -50,6 +50,14 @@ pipeline {
     }
 }
 
+	stage('Debug Token') {
+    		steps {
+        		withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
+            			bat 'echo Primeiros 20 chars do token: %SONAR_TOKEN:~0,20%'
+        }
+    }
+}
+
         stage('Design Review') {
             when {
                 expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == null }
