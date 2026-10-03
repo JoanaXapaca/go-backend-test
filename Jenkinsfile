@@ -48,7 +48,7 @@ pipeline {
         		SONAR_HOST_URL = 'http://localhost:9000'
     		}
     		steps {
-        		bat 'C:\\Users\\jrego\\AppData\\Roaming\\npm\\sonar-scanner-npm.cmd -Dsonar.token=%SONAR_TOKEN% -Dsonar.qualitygate.wait=true'
+        		bat "C:\\Users\\jrego\\AppData\\Roaming\\npm\\sonar-scanner-npm.cmd -Dsonar.token=${SONAR_TOKEN} -Dsonar.qualitygate.wait=true"
     }
 }
 
