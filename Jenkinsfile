@@ -48,7 +48,7 @@ pipeline {
        			 SONAR_HOST_URL = 'http://localhost:9000'
   		  }
     		steps {
-       			 bat 'npx sonar-scanner -Dsonar.qualitygate.wait=true'
+       			 bat 'sonar-scanner -Dsonar.qualitygate.wait=true'
     }
 }
 
