@@ -45,7 +45,7 @@ pipeline {
 	stage('SonarQube') {
     		steps {
         		withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
-            			bat 'C:\\SonarScanner-8.1.0\\sonar-scanner-8.1.0.6389-windows-x64\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true'
+            			bat "C:\\SonarScanner-8.1.0\\sonar-scanner-8.1.0.6389-windows-x64\\bin\\sonar-scanner.bat -Dsonar.token=${SONAR_TOKEN} -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true"
         }
     }
 }
