@@ -42,10 +42,13 @@ pipeline {
             }
         }
 
-	stage('SonarQube') {
-    		steps {
-        		withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
-            			bat '"%SONAR_SCANNER_5%\\bin\\sonar-scanner.bat" -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true'
+stage('SonarQube') {
+    tools {
+        sonarScanner 'SonarQube Scanner'
+    }
+    steps {
+        withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
+            bat 'sonar-scanner -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true'
         }
     }
 }
