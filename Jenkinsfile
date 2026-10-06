@@ -45,11 +45,10 @@ pipeline {
 	stage('SonarQube') {
     		steps {
         		withCredentials([string(credentialsId: 'sonar-token-web', variable: 'SONAR_TOKEN')]) {
-            			bat 'C:\\Windows\\System32\\config\\systemprofile\\.sonar\\native-sonar-scanner\\sonar-scanner-6.2.1.4610-windows-x64\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.scanner.skipJreProvisioning=true -Dsonar.qualitygate.wait=true'
+            			bat '"%SONAR_SCANNER_5%\\bin\\sonar-scanner.bat" -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true'
         }
     }
 }
-
         stage('Design Review') {
             when {
                 expression { env.BRANCH_NAME == 'main' || env.BRANCH_NAME == null }
