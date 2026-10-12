@@ -1,92 +1,55 @@
 Requirements Specification
 
 
+Project: Go Backend Test
 
-Projeto: Go Backend Test
+Standard: ISO 13485:2016 - SOP 7.3.2
 
-Norma: ISO 13485:2016 - SOP 7.3.2
-
-Versão: 1.0
-
-
-
-1\. Requisitos Funcionais
-
-| ID | Requisito | Prioridade | Estado |
-
-|----|-----------|-----------|--------|
-
-| REQ-001 | A função Soma(a, b int) int devolve a soma de dois inteiros | Alta | Implementado |
-
-| REQ-002 | A função Subtrai(a, b int) int devolve a diferença de dois inteiros | Alta | Implementado |
-
-| REQ-003 | O main() imprime os resultados no stdout | Alta | Implementado |
+Version: 1.0
 
 
 
-2\. Requisitos Não Funcionais
-
-| ID | Requisito | Métrica | Estado |
-
-|----|-----------|---------|--------|
-
-| NFR-001 | Cobertura de testes >= 80% | SonarQube | 100% |
-
-| NFR-002 | Quality Gate Passed | SonarQube | OK |
-
-| NFR-003 | 0 Issues | SonarQube | OK |
-
-| NFR-004 | 0 Vulnerabilities | SonarQube | OK |
-
-| NFR-005 | Tempo de pipeline < 5 min | Jenkins | \~1.5 min |
-
-| NFR-006 | Lint sem erros | golangci-lint | 0 issues |
+1. Functional Requirements
+| ID | Requirement | Priority | Status |
+| REQ-01 | The function `Add(a, b int) int` returns the sum of two integers | High | Implemented |
+| REQ-02 | The function `Subtract(a, b int) int` returns the difference between two integers | High | Implemented |
+| REQ-03 | The `main()` function prints the results to stdout | High | Implemented |
 
 
+2. Non-Functional Requirements
+| ID | Requirement | Metric | Status |
+| NFR-01 | Test coverage >= 80% | SonarQube | 100% |
+| NFR-02 | Quality Gate Passed | SonarQube | OK |
+| NFR-03 | 0 Issues | SonarQube | OK |
+| NFR-04 | 0 Vulnerabilities | SonarQube | OK |
+| NFR-05 | Pipeline time < 5 min | Jenkins | \~1.5 min |
+| NFR-06 | Lint without errors | golangci-lint | 0 issues |
 
-3\. Requisitos Regulamentares
 
-| ID | Requisito | Norma | Estado |
+3. Regulatory Requirements
+| ID | Requirement | Standard | Status |
+| REG-01 | Test traceability | ISO 13485 sec. 7.3.5 | OK |
+| REG-02 | Mandatory Quality Gate | FDA (SaMD) | OK |
+| REG-03 | Audit records | ISO 13485 sec. 4.2.5 | OK |
+| REG-04 | Version control | ISO 13485 sec. 4.2.4 | OK |
+| REG-05 | Static analysis | OWASP Top 10 | Partial |
 
-|----|-----------|-------|--------|
 
-| REG-001 | Rastreabilidade de testes | ISO 13485 sec. 7.3.5 | OK |
-
-| REG-002 | Quality Gate obrigatório | FDA (SaMD) | OK |
-
-| REG-003 | Registos de auditoria | ISO 13485 sec. 4.2.5 | OK |
-
-| REG-004 | Controlo de versões | ISO 13485 sec. 4.2.4 | OK |
-
-| REG-005 | Análise estática | OWASP Top 10 | Parcial |
+4. Security Requirements
+| ID | Requirement | OWASP Category | Status |
+| SEC-01 | No injections | A03 | Community does not detect |
+| SEC-02 | No hardcoded credentials | A02 | OK |
+| SEC-03 | Updated dependencies | A06 | Not verified |
 
 
 
-4\. Requisitos de Segurança
-
-| ID | Requisito | Categoria OWASP | Estado |
-
-|----|-----------|----------------|--------|
-
-| SEC-001 | Sem injeções | A03 | Community não deteta |
-
-| SEC-002 | Sem credenciais hardcoded | A02 | OK |
-
-| SEC-003 | Dependências atualizadas | A06 | Não verificado |
+5. Out of Scope
+Graphical interface, data persistence, network communication, user authentication.
 
 
 
-5\. Fora do Âmbito
-
-Interface gráfica, persistência de dados, comunicação em rede, autenticação de utilizadores.
-
-
-
-6\. Referências
-
-ISO 13485:2016 sec. 7.3.2
-
-Quality Manual GlobeStar v01.47
-
-OWASP Top 10 (2021)
+6. References
+- ISO 13485:2016 sec. 7.3.2
+- Quality Manual GlobeStar v01.47
+- OWASP Top 10 (2021)
 

@@ -2,49 +2,45 @@ Design Validation Plan
 
 
 
-Projeto: Go Backend Test
+Project: Go Backend Test
 
-Norma: ISO 13485:2016 - SOP 7.3.6
-
-
-
-1\. Objetivo
-
-Validar que o software cumpre os requisitos do utilizador em ambiente simulado. O ambiente clínico real está fora do âmbito.
+Standard: ISO 13485:2016 - SOP 7.3.6
 
 
 
-2\. Ambiente de Validação
+1\. Objective
 
-| Item | Descrição |
+Validate that the software meets user requirements in a simulated environment. The real clinical environment is out of scope.
 
-|------|-----------|
 
-| Sistema operativo | Windows 11 |
+
+2\. Validation Environment
+
+| Item | Description |
+
+| Operating system | Windows 11 |
 
 | Runtime | Go 1.27 |
 
-| Utilizador | Desenvolvedor / QA |
+| User | Developer / QA |
 
-| Cenário | Execução do binário e verificação do output |
-
-
-
-3\. Testes E2E
-
-| ID | Teste | Cenário | Critério de Aceitação |
-
-|----|-------|---------|----------------------|
-
-| E2E-001 | Compilação | go build | Binário gerado sem erros |
-
-| E2E-002 | Execução | ./app.exe | Output contém "Soma 2+3 = 5" |
-
-| E2E-003 | Execução | ./app.exe | Output contém "Subtrai 10-4 = 6" |
+| Scenario | Run the binary and verify the output |
 
 
 
-4\. Limitações
+3\. E2E Tests
 
-A validação em ambiente clínico real não é aplicável a este projeto de teste de pipeline.
+| ID | Test | Scenario | Acceptance Criterion |
+
+| E2E-001 | Compilation | go build | Binary generated without errors |
+
+| E2E-002 | Execution | ./app.exe | Output contains "Add 2+3 = 5" |
+
+| E2E-003 | Execution | ./app.exe | Output contains "Subtract 10-4 = 6" |
+
+
+
+4\. Limitations
+
+Validation in a real clinical environment is not applicable to this pipeline test project. The real product, ConnexALL, is validated at the customer site.
 
