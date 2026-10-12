@@ -30,34 +30,34 @@ pipeline {
             }
         }
 
-        stage('Testes Unitarios') {
+        stage('Unit Tests') {
             steps {
                 bat 'make test'
             }
         }
 
-        stage('Testes E2E') {
+        stage('E2E Tests') {
             steps {
                 bat 'make test-e2e'
             }
         }
 
-	stage('SonarQube') {
-   		 steps {
-        		bat """
-            set /p SONAR_TOKEN=<C:\\Users\\jrego\\sonar-token.txt
-            C:\\SonarScanner-8.1.0\\sonar-scanner-8.1.0.6389-windows-x64\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true
-        """
-    }
-}
-      
-	stage('Build') {
+        stage('SonarQube') {
+            steps {
+                bat """
+                    set /p SONAR_TOKEN=<C:\\Users\\jrego\\sonar-token.txt
+                    C:\\SonarScanner-8.1.0\\sonar-scanner-8.1.0.6389-windows-x64\\bin\\sonar-scanner.bat -Dsonar.token=%SONAR_TOKEN% -Dsonar.host.url=http://127.0.0.1:9000 -Dsonar.qualitygate.wait=true
+                """
+            }
+        }
+
+        stage('Build') {
             steps {
                 bat 'make build'
             }
         }
 
-        stage('Relatorio Auditoria') {
+        stage('Audit Report') {
             steps {
                 bat '"C:/Users/jrego/AppData/Local/Python/pythoncore-3.14-64/python.exe" scripts/gerar_relatorio.py'
                 publishHTML([
@@ -66,7 +66,7 @@ pipeline {
                     keepAll: true,
                     reportDir: 'reports',
                     reportFiles: 'auditoria.html',
-                    reportName: 'Relatorio de Auditoria (ISO/FDA)'
+                    reportName: 'Audit Report (ISO/FDA)'
                 ])
             }
         }
@@ -75,10 +75,10 @@ pipeline {
     post {
         success {
             archiveArtifacts artifacts: 'dist/**, bin/**, reports/**, coverage/**, coverage.out', fingerprint: true
-            echo 'Build aprovado'
+            echo 'Build passed'
         }
         failure {
-            echo 'Build reprovado - ver logs'
+            echo 'Build failed - check logs'
         }
     }
 }
