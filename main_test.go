@@ -2,9 +2,10 @@ package main
 
 import "testing"
 
-func TestSoma(t *testing.T) {
-	casos := []struct {
-		a, b, esperado int
+// TestAdd verifies Add with a table of input/expected pairs.
+func TestAdd(t *testing.T) {
+	cases := []struct {
+		a, b, expected int
 	}{
 		{2, 3, 5},
 		{-1, 1, 0},
@@ -12,59 +13,63 @@ func TestSoma(t *testing.T) {
 		{100, 200, 300},
 	}
 
-	for _, c := range casos {
-		resultado := Soma(c.a, c.b)
-		if resultado != c.esperado {
-			t.Errorf("Soma(%d, %d) = %d; esperado %d", c.a, c.b, resultado, c.esperado)
+	for _, c := range cases {
+		result := Add(c.a, c.b)
+		if result != c.expected {
+			t.Errorf("Add(%d, %d) = %d; expected %d", c.a, c.b, result, c.expected)
 		}
 	}
 }
 
-func TestSubtrai(t *testing.T) {
-	casos := []struct {
-		a, b, esperado int
+// TestSubtract verifies Subtract with a table of input/expected pairs.
+func TestSubtract(t *testing.T) {
+	cases := []struct {
+		a, b, expected int
 	}{
 		{10, 4, 6},
 		{0, 0, 0},
 		{-5, -5, 0},
 	}
 
-	for _, c := range casos {
-		resultado := Subtrai(c.a, c.b)
-		if resultado != c.esperado {
-			t.Errorf("Subtrai(%d, %d) = %d; esperado %d", c.a, c.b, resultado, c.esperado)
+	for _, c := range cases {
+		result := Subtract(c.a, c.b)
+		if result != c.expected {
+			t.Errorf("Subtract(%d, %d) = %d; expected %d", c.a, c.b, result, c.expected)
 		}
 	}
 }
 
-func TestSomaEdgeCases(t *testing.T) {
-	if Soma(-100, -200) != -300 {
-		t.Error("Soma com negativos falhou")
+// TestAddEdgeCases covers boundary values for Add.
+func TestAddEdgeCases(t *testing.T) {
+	if Add(-100, -200) != -300 {
+		t.Error("Add with negative numbers failed")
 	}
-	if Soma(1000000, 2000000) != 3000000 {
-		t.Error("Soma com numeros grandes falhou")
+	if Add(1000000, 2000000) != 3000000 {
+		t.Error("Add with large numbers failed")
 	}
-	if Soma(-1, 1) != 0 {
-		t.Error("Soma com opostos falhou")
-	}
-}
-
-func TestSubtraiEdgeCases(t *testing.T) {
-	if Subtrai(-100, -200) != 100 {
-		t.Error("Subtrai com negativos falhou")
-	}
-	if Subtrai(1000000, 1) != 999999 {
-		t.Error("Subtrai com numeros grandes falhou")
-	}
-	if Subtrai(0, 100) != -100 {
-		t.Error("Subtrai com resultado negativo falhou")
+	if Add(-1, 1) != 0 {
+		t.Error("Add with opposite numbers failed")
 	}
 }
 
+// TestSubtractEdgeCases covers boundary values for Subtract.
+func TestSubtractEdgeCases(t *testing.T) {
+	if Subtract(-100, -200) != 100 {
+		t.Error("Subtract with negative numbers failed")
+	}
+	if Subtract(1000000, 1) != 999999 {
+		t.Error("Subtract with large numbers failed")
+	}
+	if Subtract(0, 100) != -100 {
+		t.Error("Subtract with negative result failed")
+	}
+}
+
+// TestMain ensures main() runs without panicking.
 func TestMain(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
-			t.Errorf("main() panicou: %v", r)
+			t.Errorf("main() panicked: %v", r)
 		}
 	}()
 	main()
