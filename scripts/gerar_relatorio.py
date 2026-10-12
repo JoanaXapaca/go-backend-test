@@ -52,13 +52,25 @@ def get_commit_message():
 
 
 def get_version():
-    """Try to read the version from package.json (Vue), default to 0.0.0."""
+    """Read the version from package.json (Vue) or sonar-project.properties (Go/Vue)."""
     try:
         if os.path.exists('package.json'):
             with open('package.json', 'r') as f:
-                return json.load(f).get('version', '0.0.0')
+                version = json.load(f).get('version', None)
+                if version and version != '0.0.0':
+                    return version
     except Exception:
         pass
+
+    try:
+        if os.path.exists('sonar-project.properties'):
+            with open('sonar-project.properties', 'r') as f:
+                for line in f:
+                    if line.startswith('sonar.projectVersion='):
+                        return line.split('=', 1)[1].strip()
+    except Exception:
+        pass
+
     return '0.0.0'
 
 
