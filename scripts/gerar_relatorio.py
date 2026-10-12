@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Gerador de Relatorio de Auditoria (ISO 13485 / FDA)
-Le os resultados da pipeline e gera um HTML auditavel.
+Quality Audit Report Generator (ISO 13485 / FDA)
+Reads pipeline results and produces an auditable HTML report.
 """
 
 import os
@@ -12,45 +12,47 @@ import re
 from datetime import datetime
 
 
-def calcular_hash(ficheiro):
-    """Calcula o SHA256 (primeiros 16 chars) de um ficheiro."""
-    if not os.path.exists(ficheiro):
+def calculate_hash(file_path):
+    """Calculate the SHA256 (first 16 chars) of a file."""
+    if not os.path.exists(file_path):
         return "N/A"
     try:
-        with open(ficheiro, 'rb') as f:
+        with open(file_path, 'rb') as f:
             return hashlib.sha256(f.read()).hexdigest()[:16]
     except Exception:
         return "N/A"
 
 
-def extrair_jira_id(mensagem):
-    """Extrai o ID do Jira (ex: CONNEX-123) de uma mensagem."""
-    match = re.search(r'([A-Z]+-\d+)', mensagem)
+def extract_jira_id(message):
+    """Extract the Jira ID (e.g. CONNEX-123) from a commit message."""
+    match = re.search(r'([A-Z]+-\d+)', message)
     return match.group(1) if match else None
 
 
-def obter_commit_hash():
+def get_commit_hash():
+    """Return the current Git commit hash."""
     try:
         return subprocess.check_output(
             ['git', 'rev-parse', 'HEAD'],
             stderr=subprocess.DEVNULL
         ).decode().strip()
     except Exception:
-        return 'desconhecido'
+        return 'unknown'
 
 
-def obter_commit_message():
+def get_commit_message():
+    """Return the last Git commit message."""
     try:
         return subprocess.check_output(
             ['git', 'log', '-1', '--pretty=%B'],
             stderr=subprocess.DEVNULL
         ).decode().strip()
     except Exception:
-        return 'desconhecido'
+        return 'unknown'
 
 
-def obter_versao():
-    """Tenta ler a versao do package.json (Vue) ou do sonar-project.properties (Go)."""
+def get_version():
+    """Try to read the version from package.json (Vue), default to 0.0.0."""
     try:
         if os.path.exists('package.json'):
             with open('package.json', 'r') as f:
@@ -60,32 +62,32 @@ def obter_versao():
     return '0.0.0'
 
 
-def obter_projeto():
-    """Le o projectKey do sonar-project.properties."""
+def get_project():
+    """Read the projectKey from sonar-project.properties."""
     try:
         with open('sonar-project.properties', 'r') as f:
-            for linha in f:
-                if linha.startswith('sonar.projectKey='):
-                    return linha.split('=', 1)[1].strip()
+            for line in f:
+                if line.startswith('sonar.projectKey='):
+                    return line.split('=', 1)[1].strip()
     except Exception:
         pass
-    return 'desconhecido'
+    return 'unknown'
 
 
-def ler_cobertura():
-    """Deteta o formato da cobertura e devolve as metricas."""
+def read_coverage():
+    """Detect the coverage format and return the metrics."""
     if os.path.exists('coverage/lcov.info'):
-        return ler_cobertura_lcov()
+        return read_coverage_lcov()
     if os.path.exists('coverage.out'):
-        return ler_cobertura_go()
+        return read_coverage_go()
     return None
 
 
-def ler_cobertura_lcov():
-    """Le o ficheiro lcov.info (Vue/JS) e calcula totais."""
+def read_coverage_lcov():
+    """Read lcov.info (Vue/JS) and compute totals."""
     try:
         with open('coverage/lcov.info', 'r') as f:
-            conteudo = f.read()
+            content = f.read()
 
         total_lines = 0
         covered_lines = 0
@@ -94,67 +96,67 @@ def ler_cobertura_lcov():
         total_functions = 0
         covered_functions = 0
 
-        for linha in conteudo.splitlines():
-            if linha.startswith('LF:'):
-                total_lines += int(linha.split(':')[1])
-            elif linha.startswith('LH:'):
-                covered_lines += int(linha.split(':')[1])
-            elif linha.startswith('BRF:'):
-                total_branches += int(linha.split(':')[1])
-            elif linha.startswith('BRH:'):
-                covered_branches += int(linha.split(':')[1])
-            elif linha.startswith('FNF:'):
-                total_functions += int(linha.split(':')[1])
-            elif linha.startswith('FNH:'):
-                covered_functions += int(linha.split(':')[1])
+        for line in content.splitlines():
+            if line.startswith('LF:'):
+                total_lines += int(line.split(':')[1])
+            elif line.startswith('LH:'):
+                covered_lines += int(line.split(':')[1])
+            elif line.startswith('BRF:'):
+                total_branches += int(line.split(':')[1])
+            elif line.startswith('BRH:'):
+                covered_branches += int(line.split(':')[1])
+            elif line.startswith('FNF:'):
+                total_functions += int(line.split(':')[1])
+            elif line.startswith('FNH:'):
+                covered_functions += int(line.split(':')[1])
 
         def pct(covered, total):
             return round((covered / total * 100), 2) if total > 0 else 0.0
 
         return {
-            'lines': {'cobertas': covered_lines, 'total': total_lines, 'pct': pct(covered_lines, total_lines)},
-            'branches': {'cobertas': covered_branches, 'total': total_branches, 'pct': pct(covered_branches, total_branches)},
-            'functions': {'cobertas': covered_functions, 'total': total_functions, 'pct': pct(covered_functions, total_functions)},
+            'lines': {'covered': covered_lines, 'total': total_lines, 'pct': pct(covered_lines, total_lines)},
+            'branches': {'covered': covered_branches, 'total': total_branches, 'pct': pct(covered_branches, total_branches)},
+            'functions': {'covered': covered_functions, 'total': total_functions, 'pct': pct(covered_functions, total_functions)},
         }
     except Exception as e:
-        print(f"Erro ao ler lcov.info: {e}")
+        print(f"Error reading lcov.info: {e}")
         return None
 
 
-def ler_cobertura_go():
-    """Le a cobertura do Go usando o go tool cover."""
+def read_coverage_go():
+    """Read Go coverage using go tool cover."""
     try:
-        resultado = subprocess.check_output(
+        result = subprocess.check_output(
             ['go', 'tool', 'cover', '-func=coverage.out'],
             stderr=subprocess.DEVNULL
         ).decode()
 
-        linhas = resultado.strip().split('\n')
-        ultima = linhas[-1]  # formato: total:  (statements) XX.X%
-        pct_str = ultima.split()[-1].replace('%', '')
+        lines = result.strip().split('\n')
+        last = lines[-1]  # format: total: (statements) XX.X%
+        pct_str = last.split()[-1].replace('%', '')
         pct = float(pct_str)
 
         return {
-            'lines': {'cobertas': int(pct), 'total': 100, 'pct': pct},
-            'branches': {'cobertas': 0, 'total': 0, 'pct': 0.0},
-            'functions': {'cobertas': 0, 'total': 0, 'pct': 0.0},
+            'lines': {'covered': int(pct), 'total': 100, 'pct': pct},
+            'branches': {'covered': 0, 'total': 0, 'pct': 0.0},
+            'functions': {'covered': 0, 'total': 0, 'pct': 0.0},
         }
     except Exception as e:
-        print(f"Erro ao ler coverage.out: {e}")
+        print(f"Error reading coverage.out: {e}")
         return None
 
 
-def gerar_html(dados, ficheiro_saida):
-    projeto = dados['projeto']
-    sonar_url = f"http://localhost:9000/dashboard?id={projeto}"
-    jira_id = dados.get('jira_id') or 'N/A'
-    aprovador = dados.get('aprovador') or 'N/A'
+def generate_html(data, output_file):
+    """Build the HTML report from the collected data."""
+    project = data['project']
+    sonar_url = f"http://127.0.0.1:9000/dashboard?id={project}"
+    jira_id = data.get('jira_id') or 'N/A'
 
     html = f"""<!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Relatorio de Auditoria - {projeto}</title>
+  <title>Quality Audit Report - {project}</title>
   <style>
     body {{ font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 40px; }}
     .container {{ max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
@@ -174,63 +176,64 @@ def gerar_html(dados, ficheiro_saida):
 </head>
 <body>
   <div class="container">
-    <h1>Relatorio de Auditoria de Qualidade</h1>
+    <h1>Quality Audit Report</h1>
 
     <div class="meta">
-      <p><strong>Projeto:</strong> {projeto}</p>
-      <p><strong>Versao:</strong> {dados['versao']}</p>
-      <p><strong>Commit:</strong> <code>{dados['commit_hash'][:12]}</code></p>
-      <p><strong>Mensagem:</strong> {dados['commit_message']}</p>
+      <p><strong>Project:</strong> {project}</p>
+      <p><strong>Version:</strong> {data['version']}</p>
+      <p><strong>Commit:</strong> <code>{data['commit_hash'][:12]}</code></p>
+      <p><strong>Message:</strong> {data['commit_message']}</p>
       <p><strong>Jira Ticket:</strong> {jira_id}</p>
-      <p><strong>Aprovador:</strong> {aprovador}</p>
-      <p><strong>Data de geracao:</strong> {dados['data_geracao']}</p>
-      <p><strong>Executado por:</strong> Jenkins CI/CD</p>
+      <p><strong>Generated at:</strong> {data['generation_date']}</p>
+      <p><strong>Executed by:</strong> Jenkins CI/CD</p>
     </div>
 
-    <h2>1. Resultado da Pipeline</h2>
+    <h2>1. Pipeline Result</h2>
     <table>
-      <tr><th>Stage</th><th>Resultado</th></tr>
-      <tr><td>Checkout</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Install</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Lint</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Type-check</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Testes Unitarios</td><td class="ok">Sucesso</td></tr>
-      <tr><td>Testes E2E</td><td class="ok">Sucesso</td></tr>
+      <tr><th>Stage</th><th>Result</th></tr>
+      <tr><td>Checkout</td><td class="ok">Success</td></tr>
+      <tr><td>Install</td><td class="ok">Success</td></tr>
+      <tr><td>Lint</td><td class="ok">Success</td></tr>
+      <tr><td>Type-check</td><td class="ok">Success</td></tr>
+      <tr><td>Unit Tests</td><td class="ok">Success</td></tr>
+      <tr><td>E2E Tests</td><td class="ok">Success</td></tr>
       <tr><td>SonarQube Quality Gate</td><td class="ok">Passed</td></tr>
-      <tr><td>Build</td><td class="ok">Artefactos gerados</td></tr>
+      <tr><td>Build</td><td class="ok">Artifacts generated</td></tr>
     </table>
 
-    <h2>2. Cobertura de Testes</h2>
+    <h2>2. Test Coverage</h2>
 """
 
-    if dados['cobertura']:
-        c = dados['cobertura']
+    if data['coverage']:
+        c = data['coverage']
         html += f"""
     <table>
-      <tr><th>Metrica</th><th>Coberto</th><th>Total</th><th>%</th></tr>
-      <tr><td>Linhas</td><td>{c['lines']['cobertas']}</td><td>{c['lines']['total']}</td><td>{c['lines']['pct']}%</td></tr>
-      <tr><td>Branches</td><td>{c['branches']['cobertas']}</td><td>{c['branches']['total']}</td><td>{c['branches']['pct']}%</td></tr>
-      <tr><td>Funcoes</td><td>{c['functions']['cobertas']}</td><td>{c['functions']['total']}</td><td>{c['functions']['pct']}%</td></tr>
+      <tr><th>Metric</th><th>Covered</th><th>Total</th><th>%</th></tr>
+      <tr><td>Lines</td><td>{c['lines']['covered']}</td><td>{c['lines']['total']}</td><td>{c['lines']['pct']}%</td></tr>
+      <tr><td>Branches</td><td>{c['branches']['covered']}</td><td>{c['branches']['total']}</td><td>{c['branches']['pct']}%</td></tr>
+      <tr><td>Functions</td><td>{c['functions']['covered']}</td><td>{c['functions']['total']}</td><td>{c['functions']['pct']}%</td></tr>
     </table>
 """
     else:
-        html += '<p class="warn">Ficheiro de cobertura nao encontrado.</p>'
+        html += '<p class="warn">Coverage file not found.</p>'
 
     html += f"""
     <h2>3. Design Outputs (ISO 13485 sec. 7.3.3)</h2>
     <table>
-      <tr><th>Output</th><th>Localizacao</th><th>SHA256</th></tr>
-      <tr><td>Binario Go</td><td>bin/app.exe</td><td><code>{calcular_hash('bin/app.exe')}</code></td></tr>
-      <tr><td>Ficheiro de cobertura</td><td>coverage.xml</td><td><code>{calcular_hash('coverage.xml')}</code></td></tr>
-      <tr><td>Relatorio HTML</td><td>reports/auditoria.html</td><td>N/A (em geracao)</td></tr>
+      <tr><th>Output</th><th>Location</th><th>SHA256</th></tr>
+      <tr><td>Go binary</td><td>bin/app.exe</td><td><code>{calculate_hash('bin/app.exe')}</code></td></tr>
+      <tr><td>Coverage file</td><td>coverage.xml</td><td><code>{calculate_hash('coverage.xml')}</code></td></tr>
+      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
     </table>
 
-    <h2>4. Analise Estatica (SonarQube)</h2>
-    <p>Dashboard completo: <a href="{sonar_url}">{sonar_url}</a></p> 
-    <h2>5. Documentacao Confluence</h2>
-    <p><a href="https://uac-pipeline.atlassian.net/wiki/x/AQAs">Pipeline CI/CD — Documentação ISO 13485</a></p>
-    <h2>5. Documentacao ISO 13485</h2>
-    <p>Documentos de design e desenvolvimento (SOP 7.3):</p>
+    <h2>4. Static Analysis (SonarQube)</h2>
+    <p>Full dashboard: <a href="{sonar_url}">{sonar_url}</a></p>
+
+    <h2>5. Confluence Documentation</h2>
+    <p><a href="https://uac-pipeline.atlassian.net/wiki/x/AQAs">CI/CD Pipeline — ISO 13485 Documentation</a></p>
+
+    <h2>6. ISO 13485 Documentation</h2>
+    <p>Design and development documents (SOP 7.3):</p>
     <ul>
       <li><a href="../../docs/design-development-plan.md">Design and Development Plan (SOP 7.3.1)</a></li>
       <li><a href="../../docs/requirements.md">Requirements Specification (SOP 7.3.2)</a></li>
@@ -240,45 +243,44 @@ def gerar_html(dados, ficheiro_saida):
       <li><a href="../../docs/design-file/README.md">Design File (SOP 7.3.10)</a></li>
     </ul>
 
-    <h2>6. Conformidade Regulamentar</h2>
+    <h2>7. Regulatory Compliance</h2>
     <table>
-      <tr><th>Norma</th><th>Requisito</th><th>Estado</th></tr>
-      <tr><td>ISO 13485:2016</td><td>Rastreabilidade de testes e analise estatica</td><td class="ok">Documentado</td></tr>
-      <tr><td>ISO 13485 sec. 7.3</td><td>Design and Development File</td><td class="ok">Documentado</td></tr>
-      <tr><td>FDA (SaMD)</td><td>Quality Gate obrigatorio antes do build</td><td class="ok">Aplicado</td></tr>
-      <tr><td>HIPAA</td><td>Controlo de acesso via VPN + credenciais</td><td class="ok">Aplicado</td></tr>
-      <tr><td>WCAG 2.1 AA</td><td>Acessibilidade (a validar em E2E)</td><td class="warn">Pendente</td></tr>
-      <tr><td>OWASP Top 10</td><td>Analise estatica parcial via SonarQube Community</td><td class="warn">Parcial</td></tr>
+      <tr><th>Standard</th><th>Requirement</th><th>Status</th></tr>
+      <tr><td>ISO 13485:2016</td><td>Test and static analysis traceability</td><td class="ok">Documented</td></tr>
+      <tr><td>ISO 13485 sec. 7.3</td><td>Design and Development File</td><td class="ok">Documented</td></tr>
+      <tr><td>FDA (SaMD)</td><td>Quality Gate required before build</td><td class="ok">Applied</td></tr>
+      <tr><td>HIPAA</td><td>Access control via VPN + credentials</td><td class="ok">Applied</td></tr>
+      <tr><td>WCAG 2.1 AA</td><td>Accessibility (to be validated in E2E)</td><td class="warn">Pending</td></tr>
+      <tr><td>OWASP Top 10</td><td>Partial static analysis via SonarQube Community</td><td class="warn">Partial</td></tr>
     </table>
 
     <div class="footer">
-      <p>Relatorio gerado automaticamente pela pipeline CI/CD do Jenkins.</p>
-      <p>Este documento e parte integrante do processo de validacao de software medico.</p>
-      <p>Retencao: 2 anos ou tempo de vida do dispositivo (SOP 4.2.5).</p>
+      <p>Report generated automatically by the Jenkins CI/CD pipeline.</p>
+      <p>This document is part of the medical software validation process.</p>
+      <p>Retention: 2 years or device lifetime (SOP 4.2.5).</p>
     </div>
   </div>
 </body>
 </html>
 """
 
-    os.makedirs(os.path.dirname(ficheiro_saida), exist_ok=True)
-    with open(ficheiro_saida, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)
-    print(f"Relatorio gerado: {ficheiro_saida}")
+    print(f"Report generated: {output_file}")
 
 
 if __name__ == '__main__':
-    commit_message = obter_commit_message()
+    commit_message = get_commit_message()
 
-    dados = {
-        'projeto': obter_projeto(),
-        'commit_hash': obter_commit_hash(),
+    data = {
+        'project': get_project(),
+        'commit_hash': get_commit_hash(),
         'commit_message': commit_message,
-        'versao': obter_versao(),
-        'data_geracao': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'cobertura': ler_cobertura(),
-        'jira_id': extrair_jira_id(commit_message),
-        'aprovador': os.environ.get('APROVADOR', 'N/A'),
+        'version': get_version(),
+        'generation_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'coverage': read_coverage(),
+        'jira_id': extract_jira_id(commit_message),
     }
 
-    gerar_html(dados, 'reports/auditoria.html')
+    generate_html(data, 'reports/auditoria.html')
