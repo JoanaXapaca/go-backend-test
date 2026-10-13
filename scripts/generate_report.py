@@ -174,7 +174,6 @@ def build_design_outputs_section(technology):
       <tr><td>Go binary</td><td>bin/app.exe</td><td><code>{calculate_hash('bin/app.exe')}</code></td></tr>
       <tr><td>Coverage file</td><td>coverage.out</td><td><code>{calculate_hash('coverage.out')}</code></td></tr>
       <tr><td>Sonar coverage file</td><td>coverage.xml</td><td><code>{calculate_hash('coverage.xml')}</code></td></tr>
-      <tr><td>HTML report</td><td>reports/report.html</td><td>N/A (in progress)</td></tr>
 """
     elif technology == 'vue':
         rows = f"""
