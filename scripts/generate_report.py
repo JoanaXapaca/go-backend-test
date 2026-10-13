@@ -12,6 +12,15 @@ import re
 from datetime import datetime
 
 
+def detect_technology():
+    """Detect the project technology based on key files."""
+    if os.path.exists('go.mod'):
+        return 'go'
+    if os.path.exists('package.json'):
+        return 'vue'
+    return 'unknown'
+
+
 def calculate_hash(file_path):
     """Calculate the SHA256 (first 16 chars) of a file."""
     if not os.path.exists(file_path):
@@ -158,9 +167,36 @@ def read_coverage_go():
         return None
 
 
+def build_design_outputs_section(technology):
+    """Build the Design Outputs table based on the technology."""
+    if technology == 'go':
+        rows = f"""
+      <tr><td>Go binary</td><td>bin/app.exe</td><td><code>{calculate_hash('bin/app.exe')}</code></td></tr>
+      <tr><td>Coverage file</td><td>coverage.out</td><td><code>{calculate_hash('coverage.out')}</code></td></tr>
+      <tr><td>Sonar coverage file</td><td>coverage.xml</td><td><code>{calculate_hash('coverage.xml')}</code></td></tr>
+      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
+"""
+    elif technology == 'vue':
+        rows = f"""
+      <tr><td>Production build</td><td>dist/</td><td><code>{calculate_hash('dist/index.html')}</code></td></tr>
+      <tr><td>Coverage file</td><td>coverage/lcov.info</td><td><code>{calculate_hash('coverage/lcov.info')}</code></td></tr>
+      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
+"""
+    else:
+        rows = '<tr><td colspan="3">Unknown technology</td></tr>'
+
+    return f"""
+    <h2>3. Design Outputs (ISO 13485 sec. 7.3.3)</h2>
+    <table>
+      <tr><th>Output</th><th>Location</th><th>SHA256</th></tr>{rows}
+    </table>
+"""
+
+
 def generate_html(data, output_file):
     """Build the HTML report from the collected data."""
     project = data['project']
+    technology = data['technology']
     sonar_url = f"http://127.0.0.1:9000/dashboard?id={project}"
     jira_id = data.get('jira_id') or 'N/A'
 
@@ -192,6 +228,7 @@ def generate_html(data, output_file):
 
     <div class="meta">
       <p><strong>Project:</strong> {project}</p>
+      <p><strong>Technology:</strong> {technology}</p>
       <p><strong>Version:</strong> {data['version']}</p>
       <p><strong>Commit:</strong> <code>{data['commit_hash'][:12]}</code></p>
       <p><strong>Message:</strong> {data['commit_message']}</p>
@@ -229,15 +266,9 @@ def generate_html(data, output_file):
     else:
         html += '<p class="warn">Coverage file not found.</p>'
 
-    html += f"""
-    <h2>3. Design Outputs (ISO 13485 sec. 7.3.3)</h2>
-    <table>
-      <tr><th>Output</th><th>Location</th><th>SHA256</th></tr>
-      <tr><td>Go binary</td><td>bin/app.exe</td><td><code>{calculate_hash('bin/app.exe')}</code></td></tr>
-      <tr><td>Coverage file</td><td>coverage.xml</td><td><code>{calculate_hash('coverage.xml')}</code></td></tr>
-      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
-    </table>
+    html += build_design_outputs_section(technology)
 
+    html += f"""
     <h2>4. Static Analysis (SonarQube)</h2>
     <p>Full dashboard: <a href="{sonar_url}">{sonar_url}</a></p>
 
@@ -287,6 +318,7 @@ if __name__ == '__main__':
 
     data = {
         'project': get_project(),
+        'technology': detect_technology(),
         'commit_hash': get_commit_hash(),
         'commit_message': commit_message,
         'version': get_version(),

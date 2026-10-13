@@ -26,7 +26,7 @@ Requirement -> Test Matrix
 
 | NFR-02 | Quality Gate | SonarQube | Pipeline | OK |
 
-| REG-01 | Traceability | HTML report | gerar\_relatorio.py | OK |
+| REG-01 | Traceability | HTML report | generate\_report.py | OK |
 
 | REG-03 | Audit records | archiveArtifacts | Jenkinsfile | OK |
 

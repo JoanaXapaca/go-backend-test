@@ -59,7 +59,7 @@ pipeline {
 
         stage('Audit Report') {
             steps {
-                bat '"C:/Users/jrego/AppData/Local/Python/pythoncore-3.14-64/python.exe" scripts/gerar_relatorio.py'
+                bat '"C:/Users/jrego/AppData/Local/Python/pythoncore-3.14-64/python.exe" scripts/generate_report.py'
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
