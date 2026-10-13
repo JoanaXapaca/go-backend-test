@@ -144,7 +144,7 @@ def read_coverage_go():
         ).decode()
 
         lines = result.strip().split('\n')
-        last = lines[-1]  # format: total: (statements) XX.X%
+        last = lines[-1]
         pct_str = last.split()[-1].replace('%', '')
         pct = float(pct_str)
 
