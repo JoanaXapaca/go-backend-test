@@ -32,7 +32,7 @@ Content
 
 | Pipeline | /Jenkinsfile | Automation |
 
-| Audit Report | /reports/auditoria.html | Register |
+| Audit Report | /reports/report.html | Records |
 
 
 

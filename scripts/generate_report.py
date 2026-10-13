@@ -174,13 +174,13 @@ def build_design_outputs_section(technology):
       <tr><td>Go binary</td><td>bin/app.exe</td><td><code>{calculate_hash('bin/app.exe')}</code></td></tr>
       <tr><td>Coverage file</td><td>coverage.out</td><td><code>{calculate_hash('coverage.out')}</code></td></tr>
       <tr><td>Sonar coverage file</td><td>coverage.xml</td><td><code>{calculate_hash('coverage.xml')}</code></td></tr>
-      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
+      <tr><td>HTML report</td><td>reports/report.html</td><td>N/A (in progress)</td></tr>
 """
     elif technology == 'vue':
         rows = f"""
       <tr><td>Production build</td><td>dist/</td><td><code>{calculate_hash('dist/index.html')}</code></td></tr>
       <tr><td>Coverage file</td><td>coverage/lcov.info</td><td><code>{calculate_hash('coverage/lcov.info')}</code></td></tr>
-      <tr><td>HTML report</td><td>reports/auditoria.html</td><td>N/A (in progress)</td></tr>
+      <tr><td>HTML report</td><td>reports/report.html</td><td>N/A (in progress)</td></tr>
 """
     else:
         rows = '<tr><td colspan="3">Unknown technology</td></tr>'
@@ -327,4 +327,4 @@ if __name__ == '__main__':
         'jira_id': extract_jira_id(commit_message),
     }
 
-    generate_html(data, 'reports/auditoria.html')
+    generate_html(data, 'reports/report.html')

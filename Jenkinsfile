@@ -65,7 +65,7 @@ pipeline {
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',
-                    reportFiles: 'auditoria.html',
+                    reportFiles: 'report.html',
                     reportName: 'Audit Report (ISO/FDA)'
                 ])
             }
