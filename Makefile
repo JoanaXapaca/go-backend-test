@@ -9,6 +9,10 @@ lint:
 type-check:
 	go vet ./...
 
+coverage:
+	go test -coverprofile=coverage.out -covermode count ./...
+	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
+
 test:
 	go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
