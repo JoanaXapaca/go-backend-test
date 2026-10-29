@@ -20,6 +20,9 @@ test:
 test-e2e:
 	go test -tags=e2e -v ./...
 
+a11y:
+	@echo "Accessibility: not applicable to Go."
+
 build:
 	go build -o bin/app.exe .
 
