@@ -26,6 +26,9 @@ a11y:
 build:
 	go build -o bin/app.exe .
 
+test-integration:
+	@echo "Container integration not applicable"
+
 sonar:
 	npx sonar-scanner -Dsonar.qualitygate.wait=true
 
