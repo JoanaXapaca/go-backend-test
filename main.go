@@ -27,11 +27,11 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("Go backend pipeline test running on port 8080...")
+	fmt.Println("Go backend pipeline test running on port 8081...")
 
 	http.HandleFunc("/api/health", HealthHandler)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatal(err)
 	}
 }
