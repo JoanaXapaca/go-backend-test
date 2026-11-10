@@ -12,14 +12,14 @@ type-check:
 	go vet ./...
 
 test:
-	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine go test -coverprofile=/dev/stdout ./... > coverage.out
+	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine sh -c "go test -coverprofile=/tmp/coverage.out ./... > /dev/null && cat /tmp/coverage.out" > coverage.out
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 test-e2e:
 	go test -tags=e2e -v ./...
 
 coverage:
-	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine go test -coverprofile=/dev/stdout ./... > coverage.out
+	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine sh -c "go test -coverprofile=/tmp/coverage.out ./... > /dev/null && cat /tmp/coverage.out" > coverage.out
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 a11y:
