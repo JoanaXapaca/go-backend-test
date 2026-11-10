@@ -21,15 +21,16 @@ func Subtract(a, b int) int {
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "healthy"}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+	}
 }
 
 func main() {
 	fmt.Println("Go backend pipeline test running on port 8080...")
-	
+
 	http.HandleFunc("/api/health", HealthHandler)
-	
-	// Start the server
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
