@@ -11,7 +11,7 @@ type-check:
 
 test:
 	if not exist .gotmp mkdir .gotmp
-	set GOTMPDIR=%CD%\.gotmp && go test -coverprofile=coverage.out -covermode count ./...
+	set GOTMPDIR=.gotmp && go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 test-e2e:
@@ -19,7 +19,7 @@ test-e2e:
 
 coverage:
 	if not exist .gotmp mkdir .gotmp
-	set GOTMPDIR=%CD%\.gotmp && go test -coverprofile=coverage.out -covermode count ./...
+	set GOTMPDIR=.gotmp && go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 a11y:
