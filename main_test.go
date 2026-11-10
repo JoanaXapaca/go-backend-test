@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 // TestAdd verifies Add with a table of input/expected pairs.
@@ -91,5 +92,30 @@ func TestHealthHandler(t *testing.T) {
 	}
 	if response["status"] != "healthy" {
 		t.Errorf("handler returned unexpected body: got %v want %v", response["status"], "healthy")
+	}
+}
+
+// TestRun verifies that the server starts and responds on the health endpoint.
+// It covers the run() function so that the coverage includes main.go.
+func TestRun(t *testing.T) {
+	// Start the server in a background goroutine
+	go func() {
+		if err := run(); err != nil && err != http.ErrServerClosed {
+			t.Logf("run() returned: %v", err)
+		}
+	}()
+
+	// Give the server time to start
+	time.Sleep(1 * time.Second)
+
+	// Make a request to the health endpoint
+	resp, err := http.Get("http://localhost:8081/api/health")
+	if err != nil {
+		t.Fatalf("Failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", resp.StatusCode)
 	}
 }

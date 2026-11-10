@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 // Add returns the sum of two integers.
@@ -26,12 +27,17 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+// run contains the actual logic of the application. It is separated from main
+// so that it can be tested.
+func run() error {
 	fmt.Println("Go backend pipeline test running on port 8081...")
-
 	http.HandleFunc("/api/health", HealthHandler)
+	return http.ListenAndServe(":8081", nil)
+}
 
-	if err := http.ListenAndServe(":8081", nil); err != nil {
-		log.Fatal(err)
+func main() {
+	if err := run(); err != nil {
+		log.Printf("Error: %v", err)
+		os.Exit(1)
 	}
 }
