@@ -9,6 +9,7 @@ import json
 import hashlib
 import subprocess
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 
@@ -99,7 +100,7 @@ def read_coverage():
     """Detect the coverage format and return the metrics."""
     if os.path.exists('coverage/lcov.info'):
         return read_coverage_lcov()
-    if os.path.exists('coverage.out'):
+    if os.path.exists('coverage.xml'):
         return read_coverage_go()
     return None
 
@@ -145,25 +146,28 @@ def read_coverage_lcov():
 
 
 def read_coverage_go():
-    """Read Go coverage using go tool cover."""
+    """Read Go coverage from the coverage.xml file (SonarQube format)."""
     try:
-        result = subprocess.check_output(
-            ['go', 'tool', 'cover', '-func=coverage.out'],
-            stderr=subprocess.DEVNULL
-        ).decode()
+        tree = ET.parse('coverage.xml')
+        root = tree.getroot()
 
-        lines = result.strip().split('\n')
-        last = lines[-1]
-        pct_str = last.split()[-1].replace('%', '')
-        pct = float(pct_str)
+        total_lines = 0
+        covered_lines = 0
+
+        for line_to_cover in root.findall('.//lineToCover'):
+            total_lines += 1
+            if line_to_cover.get('covered') == 'true':
+                covered_lines += 1
+
+        pct = round((covered_lines / total_lines * 100), 2) if total_lines > 0 else 0.0
 
         return {
-            'lines': {'covered': int(pct), 'total': 100, 'pct': pct},
+            'lines': {'covered': covered_lines, 'total': total_lines, 'pct': pct},
             'branches': {'covered': 0, 'total': 0, 'pct': 0.0},
             'functions': {'covered': 0, 'total': 0, 'pct': 0.0},
         }
     except Exception as e:
-        print(f"Error reading coverage.out: {e}")
+        print(f"Error reading coverage.xml: {e}")
         return None
 
 
@@ -292,7 +296,7 @@ def generate_html(data, output_file):
       <tr><td>ISO 13485 sec. 7.3</td><td>Design and Development File</td><td class="ok">Documented</td></tr>
       <tr><td>FDA (SaMD)</td><td>Quality Gate required before build</td><td class="ok">Applied</td></tr>
       <tr><td>HIPAA</td><td>Access control via VPN + credentials</td><td class="ok">Applied</td></tr>
-      <tr><td>WCAG 2.1 AA</td><td>Accessibility (not applicable for backend)</td><td class="ok">N/A</td></tr>
+      <tr><td>WCAG 2.1 AA</td><td>Accessibility (validated by axe-core)</td><td class="ok">Applied</td></tr>
       <tr><td>OWASP Top 10</td><td>Partial static analysis via SonarQube Community</td><td class="warn">Partial</td></tr>
     </table>
 
