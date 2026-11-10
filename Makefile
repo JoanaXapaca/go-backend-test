@@ -14,7 +14,7 @@ type-check:
 test:
 	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine sh -c "go test -coverprofile=/tmp/coverage.out ./... > /dev/null && cat /tmp/coverage.out" > coverage.out
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
-	powershell -Command "(Get-Content coverage.xml) -replace '\\\\', '/' | Set-Content coverage.xml"
+	.\\scripts\\fix-coverage.bat
 
 test-e2e:
 	go test -tags=e2e -v ./...
@@ -22,7 +22,7 @@ test-e2e:
 coverage:
 	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine sh -c "go test -coverprofile=/tmp/coverage.out ./... > /dev/null && cat /tmp/coverage.out" > coverage.out
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
-	powershell -Command "(Get-Content coverage.xml) -replace '\\\\', '/' | Set-Content coverage.xml"
+	.\\scripts\\fix-coverage.bat"
 
 a11y:
 	@echo "Accessibility: not applicable to Go"
