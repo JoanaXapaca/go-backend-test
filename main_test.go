@@ -1,6 +1,11 @@
 package main
 
-import "testing"
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
 
 // TestAdd verifies Add with a table of input/expected pairs.
 func TestAdd(t *testing.T) {
@@ -65,12 +70,26 @@ func TestSubtractEdgeCases(t *testing.T) {
 	}
 }
 
-// TestMain ensures main() runs without panicking.
-func TestMain(t *testing.T) {
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("main() panicked: %v", r)
-		}
-	}()
-	main()
+// TestHealthHandler verifies the HTTP handler returns 200 and the correct JSON.
+func TestHealthHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/api/health", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(HealthHandler)
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+
+	var response map[string]string
+	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response["status"] != "healthy" {
+		t.Errorf("handler returned unexpected body: got %v want %v", response["status"], "healthy")
+	}
 }
