@@ -1,4 +1,6 @@
-﻿.PHONY: install lint type-check test test-e2e coverage a11y test-integration build sonar clean
+﻿DOCKER_EXE = C:\Users\jrego\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe
+
+.PHONY: install lint type-check test test-e2e coverage a11y test-integration build sonar clean
 
 install:
 	go mod download
@@ -10,14 +12,14 @@ type-check:
 	go vet ./...
 
 test:
-	docker run --rm -v "%CD%:/app" -w /app golang:1.27-alpine go test -coverprofile=coverage.out -covermode count ./...
+	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 test-e2e:
 	go test -tags=e2e -v ./...
 
 coverage:
-	docker run --rm -v "%CD%:/app" -w /app golang:1.27-alpine go test -coverprofile=coverage.out -covermode count ./...
+	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine go test -coverprofile=coverage.out -covermode count ./...
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
 
 a11y:
