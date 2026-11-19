@@ -1,6 +1,6 @@
 ﻿DOCKER_EXE = C:\Users\jrego\AppData\Local\Programs\DockerDesktop\resources\bin\docker.exe
 
-.PHONY: install lint type-check test test-e2e coverage a11y test-integration build sonar clean
+.PHONY: install lint type-check test test-e2e coverage a11y test-integration build docker-build sonar clean
 
 install:
 	go mod download
@@ -22,7 +22,7 @@ test-e2e:
 coverage:
 	$(DOCKER_EXE) run --rm -v "$(CURDIR):/app" -w /app golang:1.27-alpine sh -c "go test -coverprofile=/tmp/coverage.out ./... > /dev/null && cat /tmp/coverage.out" > coverage.out
 	C:\Users\jrego\go\bin\go-bcov.exe -format sonar-cover-report < coverage.out > coverage.xml
-	.\\scripts\\fix-coverage.bat"
+	.\\scripts\\fix-coverage.bat
 
 a11y:
 	@echo "Accessibility: not applicable to Go"
@@ -32,6 +32,9 @@ test-integration:
 
 build:
 	go build -o bin/app.exe .
+
+docker-build:
+	$(DOCKER_EXE) build -t go-backend-test .
 
 sonar:
 	npx sonar-scanner -Dsonar.qualitygate.wait=true

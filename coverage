@@ -1,1 +1,27 @@
 mode: set
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:50.2,50.19 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:52.3,52.13 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:54.3,54.19 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:56.3,56.12 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:62.2,62.22 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:63.3,64.1 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:65.2,66.20 2 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:67.3,68.1 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:69.2,69.36 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:82.2,83.1 2 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:84.2,84.24 2 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:85.3,86.37 2 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:87.4,87.12 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:89.3,89.62 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:90.4,91.1 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:94.2,94.17 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:95.3,96.1 1 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:99.2,100.1 2 1
+github.com/JoanaXapaca/go-backend-test/assignment/assignment.go:101.2,101.19 2 1
+github.com/JoanaXapaca/go-backend-test/main.go:13.2,14.1 1 1
+github.com/JoanaXapaca/go-backend-test/main.go:18.2,19.1 1 1
+github.com/JoanaXapaca/go-backend-test/main.go:23.2,25.90 3 1
+github.com/JoanaXapaca/go-backend-test/main.go:26.3,27.1 1 0
+github.com/JoanaXapaca/go-backend-test/main.go:33.2,36.1 3 1
+github.com/JoanaXapaca/go-backend-test/main.go:39.2,39.30 1 0
+github.com/JoanaXapaca/go-backend-test/main.go:40.3,42.1 2 0
