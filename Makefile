@@ -8,8 +8,8 @@ lint:
 
 audit:
 	if not exist bin mkdir bin
-	set GOBIN=%CD%\bin && go install golang.org/x/vuln/cmd/govulncheck@latest
-	.\bin\govulncheck.exe ./...
+	set "GOBIN=$(CURDIR)\bin" && go install golang.org/x/vuln/cmd/govulncheck@latest
+	"$(CURDIR)\bin\govulncheck.exe" ./...
 
 type-check:
 	go vet ./...
