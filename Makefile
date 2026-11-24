@@ -6,6 +6,10 @@ install:
 lint:
 	golangci-lint run ./...
 
+audit:
+	go install golang.org/x/vuln/cmd/govulncheck@latest
+	govulncheck ./...
+
 type-check:
 	go vet ./...
 
