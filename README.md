@@ -1,11 +1,19 @@
 \# Go Backend Test
+
+
+
 Go demonstration project for the CI/CD pipeline, used as a base to replicate across other technologies.
 
 
 
 \## Pipeline
 
+
+
 Runs on Jenkins, with the following stages:
+
+
+
 1\. Checkout — clones the Git repository
 
 2\. Install — `go mod download`
@@ -31,14 +39,19 @@ Trigger: Poll SCM every 5 minutes. Every push to the `main` branch triggers the 
 
 
 \## Running locally
+
+
+
 Requirements: Go 1.27+, `golangci-lint`, `go-bcov`.
 
-The Go backend exposes a health check API on port 8081.
 
-`GET /api/health` - Returns `{"status": "healthy"}`
 
 Installation:
+
+
+
 ```bash
+
 go mod download
 
 
@@ -61,19 +74,20 @@ make build
 
 Interpreting results
 Jenkins:
+
 Green: pipeline passed
+
 Red: some stage failed; check Console Output
+
 Artifacts: bin/ and reports/ archived on each build
 
 SonarQube:
-Dashboard: http://localhost:9000/dashboard?id=go-backend-test
-Quality Gate must be Passed
-Coverage is read from coverage.xml
 
-Docker:
-The project uses a multi-stage Dockerfile to produce a minimal, non-root production image based on Alpine.
-- Build the image: `docker build -t go-backend-test .`
-- Run the container: `docker run -p 8081:8081 go-backend-test`
+Dashboard: http://localhost:9000/dashboard?id=go-backend-test
+
+Quality Gate must be Passed
+
+Coverage is read from coverage.xml
 
 Stack
 Layer	Technology

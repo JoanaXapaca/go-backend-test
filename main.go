@@ -1,14 +1,19 @@
+// Package main is the entry point for the Go backend pipeline test.
+//
+// This project serves as a test bed for the CI/CD pipeline. It contains
+// three simple functions (Add, Subtract, and main) that are used to
+// validate that the pipeline runs correctly for Go projects.
+//
+// The pipeline is defined in the Jenkinsfile at the root of the repository
+// and follows the ISO 13485:2016 standard for medical device software.
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-)
+import "fmt"
 
 // Add returns the sum of two integers.
+//
+// This function is intentionally simple so that the pipeline can verify
+// the full cycle of build, test, and static analysis.
 func Add(a, b int) int {
 	return a + b
 }
@@ -18,26 +23,14 @@ func Subtract(a, b int) int {
 	return a - b
 }
 
-// HealthHandler is used by Docker/Integration tests to check if the API is up.
-func HealthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(map[string]string{"status": "healthy"}); err != nil {
-		log.Printf("Error encoding response: %v", err)
-	}
-}
-
-// run contains the actual logic of the application. It is separated from main
-// so that it can be tested.
-func run() error {
-	fmt.Println("Go backend pipeline test running on port 8081...")
-	http.HandleFunc("/api/health", HealthHandler)
-	return http.ListenAndServe(":8081", nil)
-}
-
+// main is the entry point of the program.
+//
+// It prints the results of Add and Subtract to standard output. The
+// output is captured by the E2E tests (in main_e2e_test.go) and
+// verified line by line to ensure the compiled binary behaves as
+// expected.
 func main() {
-	if err := run(); err != nil {
-		log.Printf("Error: %v", err)
-		os.Exit(1)
-	}
+	fmt.Println("Go backend pipeline test")
+	fmt.Println("Add 2+3 =", Add(2, 3))
+	fmt.Println("Subtract 10-4 =", Subtract(10, 4))
 }

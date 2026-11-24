@@ -4,32 +4,30 @@ package main
 
 import (
 	"os/exec"
+	"strings"
 	"testing"
-	"time"
 )
 
-// TestE2E_ServerStarts verifies the binary compiles and starts without immediate crashing.
-func TestE2E_ServerStarts(t *testing.T) {
+// TestE2E_Output builds the binary and verifies its stdout.
+func TestE2E_Output(t *testing.T) {
+	// Build the binary.
 	build := exec.Command("go", "build", "-o", "test_app.exe", ".")
 	if err := build.Run(); err != nil {
 		t.Fatalf("Build failed: %v", err)
 	}
 
-	cmd := exec.Command("./test_app.exe")
-	if err := cmd.Start(); err != nil {
-		t.Fatalf("Failed to start server: %v", err)
+	// Run the binary and capture its output.
+	output, err := exec.Command("./test_app.exe").Output()
+	if err != nil {
+		t.Fatalf("Execution failed: %v", err)
 	}
 
-	// Give it a moment to start
-	time.Sleep(2 * time.Second)
-
-	// Check if it's still running (hasn't crashed)
-	if cmd.Process == nil {
-		t.Fatal("Process is nil, server failed to start")
+	// Verify the output contains the expected lines.
+	out := string(output)
+	if !strings.Contains(out, "Add 2+3 = 5") {
+		t.Error("Output does not contain 'Add 2+3 = 5'")
 	}
-
-	// Kill it to clean up
-	if err := cmd.Process.Kill(); err != nil {
-		t.Logf("Warning: could not kill process: %v", err)
+	if !strings.Contains(out, "Subtract 10-4 = 6") {
+		t.Error("Output does not contain 'Subtract 10-4 = 6'")
 	}
 }
