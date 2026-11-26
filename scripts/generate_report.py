@@ -153,7 +153,6 @@ def generate_html(data, output_file):
     sonar_url = f"http://127.0.0.1:9000/dashboard?id={project}"
     jira_id = data.get('jira_id') or 'N/A'
 
-    # CSS melhorado para um aspeto mais profissional
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -253,14 +252,14 @@ def generate_html(data, output_file):
     </div>
 
     <h2>5. Compliance Documentation (ISO 13485)</h2>
-    <p>As required by medical device regulations, all design and development steps must be documented and traceable. The following documents are linked to this repository:</p>
+    <p>As required by medical device regulations, all design and development steps must be documented and traceable. The following documents are located in the <code>docs/</code> folder of this repository:</p>
     <ul>
-      <li><a href="../../docs/design-development-plan.md">Design and Development Plan (SOP 7.3.1)</a></li>
-      <li><a href="../../docs/requirements.md">Requirements Specification (SOP 7.3.2)</a></li>
-      <li><a href="../../docs/traceability-matrix.md">Traceability Matrix (SOP 7.3.2 + 7.3.5)</a></li>
-      <li><a href="../../docs/qms-software-validation.md">QMS Software Validation (SOP 4.1.6)</a></li>
-      <li><a href="../../docs/validation-plan.md">Validation Plan (SOP 7.3.6)</a></li>
-      <li><a href="../../docs/design-file/README.md">Design File Index (SOP 7.3.10)</a></li>
+      <li><strong>Design and Development Plan</strong> (SOP 7.3.1) - <code>docs/design-development-plan.md</code></li>
+      <li><strong>Requirements Specification</strong> (SOP 7.3.2) - <code>docs/requirements.md</code></li>
+      <li><strong>Traceability Matrix</strong> (SOP 7.3.2 + 7.3.5) - <code>docs/traceability-matrix.md</code></li>
+      <li><strong>QMS Software Validation</strong> (SOP 4.1.6) - <code>docs/qms-software-validation.md</code></li>
+      <li><strong>Validation Plan</strong> (SOP 7.3.6) - <code>docs/validation-plan.md</code></li>
+      <li><strong>Design File Index</strong> (SOP 7.3.10) - <code>docs/design-file/README.md</code></li>
     </ul>
 
     <h2>6. Regulatory Compliance Matrix</h2>
@@ -301,6 +300,13 @@ def generate_html(data, output_file):
 
 if __name__ == '__main__':
     commit_message = get_commit_message()
+    
+    if os.path.exists('reports/auditoria.html'):
+        try:
+            os.remove('reports/auditoria.html')
+            print("Removed old auditoria.html")
+        except Exception:
+            pass
 
     data = {
         'project': get_project(),
